@@ -10,12 +10,11 @@ class FaceApp : Application(){
     }
 
     companion object{
-        var instance: FaceApp? = null
+        lateinit var instance: FaceApp
 
         @JvmName("getInstance1")
         fun getInstance(): FaceApp {
-            return instance!!
+            return instance
         }
     }
-
 }

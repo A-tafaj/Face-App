@@ -31,6 +31,7 @@ import android.view.View
 
 
 class CameraActivity : AppCompatActivity() {
+
     private val TAG = "CameraActivity"
     private lateinit var binding: ActivityMainBinding
     val REQUEST_IMAGE_CAPTURE = 1
@@ -62,20 +63,17 @@ class CameraActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            binding.captureImg.setImageBitmap(cameraViewModel.imageOrientation())
-            cameraViewModel.galleryAddPic()
+            binding.captureImg.setImageBitmap(cameraViewModel.getOrientatedImage())
         }
-        if (resultCode === RESULT_OK && requestCode === REQUEST_OPEN_GALLERY) {
+        if (resultCode == RESULT_OK && requestCode == REQUEST_OPEN_GALLERY) {
                 // Get the url from data
                 val selectedImageUri: Uri? = data?.data
                 if (null != selectedImageUri) {
                     binding.galleryImg.setImageURI(selectedImageUri)
             }
         }
-
     }
 
-    /* Choose an image from Gallery */
     private fun openGalleryChooser() {
         val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
         startActivityForResult(Intent.createChooser(galleryIntent, "Select Picture"), REQUEST_OPEN_GALLERY)
@@ -96,6 +94,7 @@ class CameraActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return
         }
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             //ask for permission
             ActivityCompat.requestPermissions(
@@ -104,6 +103,7 @@ class CameraActivity : AppCompatActivity() {
             )
         }
     }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
         when (requestCode) {
             SELECT_PICTURE_CODE -> {
@@ -115,9 +115,6 @@ class CameraActivity : AppCompatActivity() {
                         val showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, permission!!)
                         if (showRationale) {
                             Log.d(TAG, "onRequestPermissionsResult: access to media is crucial to this app")
-                        } else {
-                            Log.d(TAG, "onRequestPermissionsResult: access to media is crucial to this app")
-                            //showSettingsAlert()
                         }
                     }
                     i++

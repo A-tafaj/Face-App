@@ -30,7 +30,7 @@ class CameraViewModel : ViewModel() {
 
     @Throws(IOException::class)
     private fun createImageFile(): File {
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val timeStamp: String = SimpleDateFormat("ddMMyyyy_HHmmss", Locale.GERMANY).format(Date())
         val storageDir: File? = FaceApp.getInstance().applicationContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
             "JPEG_${timeStamp}_",
@@ -62,13 +62,6 @@ class CameraViewModel : ViewModel() {
             }
         }
     }
-    fun galleryAddPic() {
-        Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).also { mediaScanIntent ->
-            val f = File(currentPhotoPath)
-            mediaScanIntent.data = Uri.fromFile(f)
-            FaceApp.getInstance().applicationContext.sendBroadcast(mediaScanIntent)
-        }
-    }
 
     /**
      * Most phone cameras are landscape, meaning if you take the photo in portrait,
@@ -83,7 +76,7 @@ class CameraViewModel : ViewModel() {
             ExifInterface.ORIENTATION_UNDEFINED);
     }
 
-    fun imageOrientation(): Bitmap? {
+    fun getOrientatedImage(): Bitmap? {
         var  rotatedBitmap: Bitmap? = when(getOrientation()) {
             ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(getImage(), 90f)
             ExifInterface.ORIENTATION_ROTATE_180 ->rotateImage(getImage(), 180f)
