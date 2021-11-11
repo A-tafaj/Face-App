@@ -8,6 +8,7 @@ import android.media.ExifInterface
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.content.FileProvider
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,6 +17,8 @@ import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+
+private const val TAG = "CameraViewModel"
 
 class CameraViewModel : ViewModel() {
     var imageIntent = MutableLiveData<Intent>()
@@ -27,32 +30,26 @@ class CameraViewModel : ViewModel() {
 
     @Throws(IOException::class)
     private fun createImageFile(): File {
-        // Create an image file name
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
         val storageDir: File? = FaceApp.getInstance().applicationContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
-            "JPEG_${timeStamp}_", /* prefix */
-            ".jpg", /* suffix */
-            storageDir /* directory */
+            "JPEG_${timeStamp}_",
+            ".jpg",
+            storageDir
         ).apply {
-            // Save a file: path for use with ACTION_VIEW intents
             currentPhotoPath = absolutePath
         }
     }
 
     fun dispatchTakePictureIntent() {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-            // Ensure that there's a camera activity to handle the intent
             takePictureIntent.resolveActivity(FaceApp.getInstance().applicationContext.packageManager)?.also {
-                // Create the File where the photo should go
                 val photoFile: File? = try {
                     createImageFile()
                 } catch (ex: IOException) {
-                    // Error occurred while creating the File
-
+                    Log.e(TAG, "dispatchTakePictureIntent: $ex", )
                     null
                 }
-                // Continue only if the File was successfully created
                 photoFile?.also {
                     val photoURI: Uri = FileProvider.getUriForFile(
                         FaceApp.getInstance().applicationContext,
@@ -60,10 +57,7 @@ class CameraViewModel : ViewModel() {
                         it
                     )
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                    //
                     imageIntent.postValue(takePictureIntent)
-                    //startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
-                    // TODO(THE UPPER LINE SHOULD BE CALLED IN ACTIVITY)
                 }
             }
         }
@@ -91,15 +85,10 @@ class CameraViewModel : ViewModel() {
 
     fun imageOrientation(): Bitmap? {
         var  rotatedBitmap: Bitmap? = when(getOrientation()) {
-            ExifInterface.ORIENTATION_ROTATE_90 -> {
-                rotateImage(getImage(), 90f)
-            }
-            ExifInterface.ORIENTATION_ROTATE_180 ->{
-                rotateImage(getImage(), 180f)
-            }
-            ExifInterface.ORIENTATION_ROTATE_270 ->{
-                rotateImage(getImage(), 270f)
-            }else -> getImage()
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(getImage(), 90f)
+            ExifInterface.ORIENTATION_ROTATE_180 ->rotateImage(getImage(), 180f)
+            ExifInterface.ORIENTATION_ROTATE_270 ->rotateImage(getImage(), 270f)
+            else -> getImage()
         }
         return rotatedBitmap
     }
