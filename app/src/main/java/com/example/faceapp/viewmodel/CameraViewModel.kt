@@ -12,7 +12,7 @@ import android.util.Log
 import androidx.core.content.FileProvider
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.faceapp.FaceApp
+import com.example.faceapp.utils.FaceApp
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat

@@ -1,4 +1,4 @@
-package com.example.faceapp
+package com.example.faceapp.utils
 
 import android.app.Application
 
