@@ -1,41 +1,26 @@
 package com.example.faceapp.activities
-
 import android.Manifest
-import android.app.AlertDialog
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.database.Cursor
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.faceapp.databinding.ActivityMainBinding
 import com.example.faceapp.viewmodel.CameraViewModel
-import androidx.core.app.ActivityCompat
-
-import android.content.pm.PackageManager
-
-import androidx.core.content.ContextCompat
-
-import android.os.Build
-import androidx.annotation.NonNull
-import android.content.DialogInterface
-import android.app.Activity
-import android.net.Uri
-import android.provider.Settings
-import android.R
-import android.R.attr
-
-import android.R.attr.data
-import android.view.View
-
-
 class CameraActivity : AppCompatActivity() {
-
     private val TAG = "CameraActivity"
     private lateinit var binding: ActivityMainBinding
     val REQUEST_IMAGE_CAPTURE = 1
-    private var permissionGranted = true
     private val REQUEST_OPEN_GALLERY = 2
     private val SELECT_PICTURE_CODE = 3
     private val cameraViewModel: CameraViewModel by viewModels()
@@ -44,12 +29,10 @@ class CameraActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         initClickListeners()
         observeViewModel()
-        handlePermission()
-    }
 
+    }
     private fun observeViewModel() {
         try {
             cameraViewModel.imageIntent.observe(this, { intent ->
@@ -58,19 +41,29 @@ class CameraActivity : AppCompatActivity() {
         } catch (e: ActivityNotFoundException) {
             Log.e(TAG, "dispatchTakePictureIntent: $e")
         }
+        cameraViewModel.passJson.observe(this, {json ->
+            binding.apiData.text = json
+            Log.d(TAG, "observeViewModel: detectAndFrame =  $json")
+        })
     }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             binding.captureImg.setImageBitmap(cameraViewModel.getOrientatedImage())
         }
         if (resultCode == RESULT_OK && requestCode == REQUEST_OPEN_GALLERY) {
-                // Get the url from data
-                val selectedImageUri: Uri? = data?.data
-                if (null != selectedImageUri) {
-                    binding.galleryImg.setImageURI(selectedImageUri)
+            // Get the url from data
+            val selectedImageUri: Uri? = data?.data
+            Log.d("ardiantest", "selected uri :${data?.data}")
+            //
+
+
+            val bm: Bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, selectedImageUri)
+            if (null != selectedImageUri) {
+                binding.captureImg.setImageBitmap(bm)
+            //binding.captureImg.setImageURI(selectedImageUri)
             }
+            cameraViewModel.detectAndFrame(cameraViewModel.getPath( this, selectedImageUri ))
         }
     }
 
@@ -83,41 +76,32 @@ class CameraActivity : AppCompatActivity() {
         binding.captureBtn.setOnClickListener {
             cameraViewModel.dispatchTakePictureIntent()
         }
-        binding.galleryBtn.setOnClickListener{
-            if (permissionGranted){
-                openGalleryChooser()
-            }
+        binding.galleryBtn.setOnClickListener {
+            handlePermission()
         }
     }
-
     private fun handlePermission() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return
-        }
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            //ask for permission
             ActivityCompat.requestPermissions(
                 this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
                 SELECT_PICTURE_CODE
             )
+        } else {
+            openGalleryChooser()
         }
     }
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
         when (requestCode) {
             SELECT_PICTURE_CODE -> {
-                var i = 0
-                while (i < permissions.size) {
-                    val permission = permissions[i]
-                    if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
-                        permissionGranted = false
-                        val showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, permission!!)
-                        if (showRationale) {
-                            Log.d(TAG, "onRequestPermissionsResult: access to media is crucial to this app")
-                        }
+                val permission = permissions[0]
+                if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_LONG).show()
+                    val showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, permission!!)
+                    if (showRationale) {
+                        Log.d(TAG, "onRequestPermissionsResult: access to media is crucial to this app")
                     }
-                    i++
+                } else {
+                    openGalleryChooser()
                 }
             }
         }

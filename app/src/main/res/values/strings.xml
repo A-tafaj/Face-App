@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">FaceApp</string>
+    <string name="face_api">a599f5e2faa24c0baed15f54e715d2e3</string>
 </resources>
