@@ -7,35 +7,31 @@ import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.graphics.drawable.BitmapDrawable
 import android.media.ExifInterface
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import android.widget.ImageView
-import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.faceapp.utils.FaceApp
-import java.io.File
-import java.io.IOException
 import androidx.lifecycle.viewModelScope
+import com.example.faceapp.utils.FaceApp
 import com.microsoft.projectoxford.face.FaceServiceClient.FaceAttributeType
-import com.microsoft.projectoxford.face.FaceServiceClient.FaceAttributeType.*
+import com.microsoft.projectoxford.face.FaceServiceClient.FaceAttributeType.Emotion
+import com.microsoft.projectoxford.face.FaceServiceClient.FaceAttributeType.Gender
 import com.microsoft.projectoxford.face.FaceServiceRestClient
 import com.microsoft.projectoxford.face.contract.Face
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.*
-import java.net.URI
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.security.auth.login.LoginException
 
 private const val TAG = "CameraViewModel"
 
@@ -94,8 +90,7 @@ class CameraViewModel : ViewModel() {
         )
     }
 
-    /***/
-    fun fillJSON(result: Array<Face>){
+    fun fillJSON(result: Array<Face>) {
         for (i in result.indices) {
             jsonObject.put("happiness", result[i].faceAttributes.emotion.happiness)
             jsonObject.put("sadness", result[i].faceAttributes.emotion.sadness)
@@ -109,13 +104,15 @@ class CameraViewModel : ViewModel() {
             jsonObject2.put(i.toString(), jsonObject)
         }
     }
+
     fun detectAndFrame(filePath: String) {
         val targetStream: InputStream = FileInputStream(File(filePath))
         viewModelScope.launch {
             try {
                 Log.d(TAG, "detectAndFrame: init")
                 withContext(Dispatchers.IO) {
-                    val result: Array<Face> = faceServiceClient.detect(targetStream,true,true, faceAttributes()
+                    val result: Array<Face> = faceServiceClient.detect(
+                        targetStream, true, true, faceAttributes()
                     )
                     fillJSON(result)
                     passJson.postValue(jsonObject2.toString())
@@ -126,7 +123,6 @@ class CameraViewModel : ViewModel() {
             }
         }
     }
-
 
     fun getOrientation(): Int {
         val exifInterface = ExifInterface(currentPhotoPath);
@@ -145,16 +141,7 @@ class CameraViewModel : ViewModel() {
         }
         return rotatedBitmap
     }
-    /*fun getOrientatedImage(bitmap: Bitmap): Bitmap? {
-        val rotatedBitmap: Bitmap? = when (getOrientation()) {
-            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(bitmap, 90f)
-            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(bitmap, 180f)
-            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(bitmap, 270f)
-            else -> getImage()
-        }
-        return rotatedBitmap
-    }
-*/
+
     fun rotateImage(source: Bitmap, angle: Float): Bitmap? {
         val matrix = Matrix()
         matrix.postRotate(angle)
@@ -175,6 +162,6 @@ class CameraViewModel : ViewModel() {
             }
             cursor.close()
         }
-        return result?:"Not found"
+        return result ?: "Not found"
     }
 }

@@ -1,11 +1,9 @@
 package com.example.faceapp.activities
+
 import android.Manifest
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.Cursor
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -17,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.faceapp.databinding.ActivityMainBinding
 import com.example.faceapp.viewmodel.CameraViewModel
+
 class CameraActivity : AppCompatActivity() {
     private val TAG = "CameraActivity"
     private lateinit var binding: ActivityMainBinding
@@ -33,6 +32,7 @@ class CameraActivity : AppCompatActivity() {
         observeViewModel()
 
     }
+
     private fun observeViewModel() {
         try {
             cameraViewModel.imageIntent.observe(this, { intent ->
@@ -41,29 +41,26 @@ class CameraActivity : AppCompatActivity() {
         } catch (e: ActivityNotFoundException) {
             Log.e(TAG, "dispatchTakePictureIntent: $e")
         }
-        cameraViewModel.passJson.observe(this, {json ->
+        cameraViewModel.passJson.observe(this, { json ->
             binding.apiData.text = json
             Log.d(TAG, "observeViewModel: detectAndFrame =  $json")
         })
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             binding.captureImg.setImageBitmap(cameraViewModel.getOrientatedImage())
+            cameraViewModel.detectAndFrame(cameraViewModel.currentPhotoPath)
         }
         if (resultCode == RESULT_OK && requestCode == REQUEST_OPEN_GALLERY) {
             // Get the url from data
             val selectedImageUri: Uri? = data?.data
-            Log.d("ardiantest", "selected uri :${data?.data}")
-            //
 
-
-            val bm: Bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, selectedImageUri)
             if (null != selectedImageUri) {
-                binding.captureImg.setImageBitmap(bm)
-            //binding.captureImg.setImageURI(selectedImageUri)
+                binding.captureImg.setImageURI(selectedImageUri)
             }
-            cameraViewModel.detectAndFrame(cameraViewModel.getPath( this, selectedImageUri ))
+            cameraViewModel.detectAndFrame(cameraViewModel.getPath(this, selectedImageUri))
         }
     }
 
@@ -80,6 +77,7 @@ class CameraActivity : AppCompatActivity() {
             handlePermission()
         }
     }
+
     private fun handlePermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
@@ -90,6 +88,7 @@ class CameraActivity : AppCompatActivity() {
             openGalleryChooser()
         }
     }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
         when (requestCode) {
             SELECT_PICTURE_CODE -> {
