@@ -12,6 +12,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.faceapp.adapters.EmotionListAdapter
 import com.example.faceapp.databinding.ActivityMainBinding
 import com.example.faceapp.utils.ImageInteractor
 import com.example.faceapp.viewmodel.CameraViewModel
@@ -22,6 +25,7 @@ class CameraActivity : AppCompatActivity() {
     val REQUEST_IMAGE_CAPTURE = 1
     private val REQUEST_OPEN_GALLERY = 2
     private val SELECT_PICTURE_CODE = 3
+    private lateinit var emotionListAdapter: EmotionListAdapter
     private val imageInteractor = ImageInteractor()
     private val cameraViewModel: CameraViewModel by viewModels()
 
@@ -29,37 +33,49 @@ class CameraActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        initializeRecyclerView()
         initClickListeners()
         observeViewModel()
-
     }
 
-    /**observe when user takes photo and observe when we get the emotions*/
     private fun observeViewModel() {
-        try {
-            cameraViewModel.imageIntent.observe(this, { intent ->
+        cameraViewModel.imageIntent.observe(this, { intent ->
+            try {
                 startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
-            })
-        } catch (e: ActivityNotFoundException) {
-            Log.e(TAG, "dispatchTakePictureIntent: $e")
-        }
-        cameraViewModel.passJson.observe(this, { json ->
-            binding.apiData.text = json
-            Log.d(TAG, "observeViewModel: detectAndFrame =  $json")
+            } catch (e: ActivityNotFoundException) {
+                Log.e(TAG, "dispatchTakePictureIntent: $e")
+            }
+        })
+
+        cameraViewModel.passArrayOfEmotions.observe(this, {
+            Log.d(TAG, "observeViewModel: $it")
+            emotionListAdapter.setMyListData(it)
         })
         cameraViewModel.passDrawnImage.observe(this, { drawnImage ->
-            binding.captureImg.setImageBitmap(drawnImage)// this
-            Log.d(TAG, "observeViewModel: -> drawnImage $drawnImage")
+            binding.captureImg.setImageBitmap(drawnImage)
         })
     }
 
-    /**check the reqest granted and set img from camera or gallery (detect emotions on both), draw rectangle on faces*/
+    fun initializeRecyclerView() {
+        emotionListAdapter = EmotionListAdapter()
+        binding.recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+
+        with(binding.recyclerView) {
+            setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(this@CameraActivity)
+            adapter = emotionListAdapter
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        emotionListAdapter.clear()
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             binding.captureImg.setImageBitmap(imageInteractor.getOrientatedImage(cameraViewModel.currentPhotoPath))
             cameraViewModel.detectAndFrame(cameraViewModel.currentPhotoPath)
         }
+
         if (resultCode == RESULT_OK && requestCode == REQUEST_OPEN_GALLERY) {
             // Get the url from data
             data?.data?.run {
@@ -70,7 +86,6 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    /**open gallery*/
     private fun chooseImageFromGallery() {
         val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
         startActivityForResult(Intent.createChooser(galleryIntent, "Select Picture"), REQUEST_OPEN_GALLERY)

@@ -67,6 +67,8 @@ class ImageInteractor {
             for (indice in faces.indices) {
                 paint.color = colors[(indice) % 6]
                 val faceRectangle = faces[indice].faceRectangle
+                val cX = faceRectangle.left + faceRectangle.width / 2
+                val cY = faceRectangle.top + faceRectangle.height
                 canvas.drawRect(
                     faceRectangle.left.toFloat(),
                     faceRectangle.top.toFloat(), (
@@ -74,9 +76,19 @@ class ImageInteractor {
                             faceRectangle.top + faceRectangle.height).toFloat(),
                     paint
                 )
-
+                drawFaceId(canvas, 65, cX, cY + 70, Color.GREEN, indice + 1)
             }
         }
         return bitmap
+    }
+
+    fun drawFaceId(canvas: Canvas, textsize: Int, cX: Int, cY: Int, color: Int, id: Int) {
+        val paint = Paint()
+        paint.isAntiAlias = true
+        paint.style = Paint.Style.FILL
+        paint.strokeWidth = 12f
+        paint.color = color
+        paint.textSize = textsize.toFloat()
+        canvas.drawText(id.toString(), cX.toFloat(), cY.toFloat(), paint)
     }
 }

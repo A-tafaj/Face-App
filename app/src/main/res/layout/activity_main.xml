@@ -41,10 +41,22 @@
         android:layout_height="0dp"
         android:id="@+id/apiData"
         android:gravity="center_vertical"
+        android:text="@string/match_id"
         app:layout_constraintTop_toBottomOf="@+id/galleryBtn"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
         app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintVertical_weight="1"
         app:layout_constraintStart_toEndOf="@id/captureImg"
+        app:layout_constraintEnd_toEndOf="parent"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:id="@+id/recyclerView"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintVertical_weight="2"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/apiData"
+        app:layout_constraintStart_toEndOf="@+id/captureImg"
         app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
