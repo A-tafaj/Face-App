@@ -9,6 +9,13 @@ import com.microsoft.projectoxford.face.contract.Face
 
 class ImageInteractor {
 
+    /**
+     * Most phone cameras are landscape, meaning if you take the photo in portrait,
+     * the resulting photos will be rotated 90 degrees. In this case,
+     * the camera software should populate the Exif data with the orientation that the photo should be viewed in.
+     *  Note that the below solution depends on the camera software/device manufacturer populating the Exif data,
+     *  so it will work in most cases, but it is not a 100% reliable solution.
+     */
     fun rotateImage(source: Bitmap, angle: Float): Bitmap? {
         val matrix = Matrix()
         matrix.postRotate(angle)
@@ -59,16 +66,19 @@ class ImageInteractor {
         val bitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
         val canvas = Canvas(bitmap)
         val paint = Paint()
+        val colors = arrayOf(Color.BLUE, Color.BLACK, Color.GREEN, Color.WHITE, Color.RED, Color.YELLOW, Color.CYAN)
+
         paint.isAntiAlias = true
         paint.style = Paint.Style.STROKE
-        val colors = arrayOf(Color.BLUE, Color.BLACK, Color.GREEN, Color.WHITE, Color.RED, Color.YELLOW, Color.CYAN)
         paint.strokeWidth = 5f
+
         if (faces != null) {
             for (indice in faces.indices) {
                 paint.color = colors[(indice) % 6]
                 val faceRectangle = faces[indice].faceRectangle
                 val cX = faceRectangle.left + faceRectangle.width / 2
                 val cY = faceRectangle.top + faceRectangle.height
+
                 canvas.drawRect(
                     faceRectangle.left.toFloat(),
                     faceRectangle.top.toFloat(), (
@@ -84,11 +94,13 @@ class ImageInteractor {
 
     fun drawFaceId(canvas: Canvas, textsize: Int, cX: Int, cY: Int, color: Int, id: Int) {
         val paint = Paint()
+
         paint.isAntiAlias = true
         paint.style = Paint.Style.FILL
         paint.strokeWidth = 12f
         paint.color = color
         paint.textSize = textsize.toFloat()
+
         canvas.drawText(id.toString(), cX.toFloat(), cY.toFloat(), paint)
     }
 }
