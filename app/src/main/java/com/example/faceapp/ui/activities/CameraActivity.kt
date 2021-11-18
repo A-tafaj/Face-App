@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager.widget.PagerAdapter
 import com.example.faceapp.adapters.EmotionListAdapter
 import com.example.faceapp.databinding.ActivityMainBinding
 import com.example.faceapp.utils.ImageInteractor
