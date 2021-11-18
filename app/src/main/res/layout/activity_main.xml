@@ -74,6 +74,7 @@
         app:layout_constraintStart_toStartOf="parent"
         android:indeterminate="true"
         android:minWidth="200dp"
+        android:visibility="invisible"
         android:minHeight="50dp"
         android:progress="0" />
 
