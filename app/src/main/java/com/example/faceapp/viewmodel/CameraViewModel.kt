@@ -10,6 +10,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.faceapp.SingleLiveEvent
 import com.example.faceapp.services.FaceServiceRestClient.getFaceServiceRestClient
 import com.example.faceapp.utils.FaceApp
 import com.example.faceapp.utils.GenericMethods.decimalFormat
@@ -31,7 +32,7 @@ private const val TAG = "CameraViewModel"
 class CameraViewModel : ViewModel() {
     var progressVisibility =  MutableLiveData<Boolean>()
     var passArrayOfEmotions = MutableLiveData<List<String>>()
-    var imageIntent = MutableLiveData<Intent>()
+    var imageIntent = SingleLiveEvent<Intent>()
     var passDrawnImage = MutableLiveData<Bitmap>()
     private var arrayOfEmotions = arrayListOf<String>()
     private var arrayOfFaces = arrayListOf<String>()
