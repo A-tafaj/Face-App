@@ -1,4 +1,4 @@
-package com.example.faceapp.activities
+package com.example.faceapp.ui.activities
 
 import android.Manifest
 import android.content.ActivityNotFoundException
@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -21,17 +22,19 @@ import com.example.faceapp.viewmodel.CameraViewModel
 
 class CameraActivity : AppCompatActivity() {
     private val TAG = "CameraActivity"
-    private lateinit var binding: ActivityMainBinding
-    val REQUEST_IMAGE_CAPTURE = 1
+    private val REQUEST_IMAGE_CAPTURE = 1
     private val REQUEST_OPEN_GALLERY = 2
     private val SELECT_PICTURE_CODE = 3
-    private lateinit var emotionListAdapter: EmotionListAdapter
     private val imageInteractor = ImageInteractor()
     private val cameraViewModel: CameraViewModel by viewModels()
+
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var emotionListAdapter: EmotionListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+
         setContentView(binding.root)
 
         initializeRecyclerView()
@@ -49,11 +52,17 @@ class CameraActivity : AppCompatActivity() {
         })
 
         cameraViewModel.passArrayOfEmotions.observe(this, {
-            Log.d(TAG, "observeViewModel: $it")
             emotionListAdapter.setMyListData(it)
         })
         cameraViewModel.passDrawnImage.observe(this, { drawnImage ->
             binding.captureImg.setImageBitmap(drawnImage)
+        })
+        cameraViewModel.progressVisibility.observe(this, {
+            if (it) {
+                binding.progressBar.visibility = View.VISIBLE
+            } else {
+                binding.progressBar.visibility = View.INVISIBLE
+            }
         })
     }
 

@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">FaceApp</string>
     <string name="face_api">a599f5e2faa24c0baed15f54e715d2e3</string>
-    <string name="match_id">The number under the rectangle matches the matches the number on the result text for that face:</string>
+    <string name="match_id">The number under the rectangle the matches the number on the result text for that face: </string>
 </resources>

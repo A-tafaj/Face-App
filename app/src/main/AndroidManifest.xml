@@ -26,7 +26,7 @@
                 android:resource="@xml/file_paths"/>
         </provider>
         <activity
-            android:name=".activities.CameraActivity"
+            android:name="com.example.faceapp.ui.activities.CameraActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
