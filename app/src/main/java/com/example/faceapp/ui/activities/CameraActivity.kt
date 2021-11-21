@@ -15,127 +15,51 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.viewpager.widget.PagerAdapter
+import androidx.viewpager2.widget.ViewPager2
 import com.example.faceapp.adapters.EmotionListAdapter
+import com.example.faceapp.adapters.ViewPagerFragmentAdapter
 import com.example.faceapp.databinding.ActivityMainBinding
 import com.example.faceapp.utils.ImageInteractor
 import com.example.faceapp.viewmodel.CameraViewModel
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 
 class CameraActivity : AppCompatActivity() {
     private val TAG = "CameraActivity"
-    private val REQUEST_IMAGE_CAPTURE = 1
-    private val REQUEST_OPEN_GALLERY = 2
-    private val SELECT_PICTURE_CODE = 3
-    private val imageInteractor = ImageInteractor()
+
     private val cameraViewModel: CameraViewModel by viewModels()
+    private lateinit var viewPager2: ViewPager2
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var emotionListAdapter: EmotionListAdapter
+    private lateinit var viewPagerAdapter: ViewPagerFragmentAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
 
+
+
         setContentView(binding.root)
 
-        initializeRecyclerView()
-        initClickListeners()
-        observeViewModel()
-    }
+        initializeViewPagerAdapter()
 
-    private fun observeViewModel() {
-        cameraViewModel.imageIntent.observe(this, { intent ->
-            try {
-                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
-            } catch (e: ActivityNotFoundException) {
-                Log.e(TAG, "dispatchTakePictureIntent: $e")
+        TabLayoutMediator(binding.tabLayout, viewPager2) { tab, position ->
+            val fragments = viewPagerAdapter.getMyFragments()
+            if (position == 0){
+                tab.text = "Take Image"
             }
-        })
-
-        cameraViewModel.passArrayOfEmotions.observe(this, {
-            emotionListAdapter.setMyListData(it)
-        })
-        cameraViewModel.passDrawnImage.observe(this, { drawnImage ->
-            binding.captureImg.setImageBitmap(drawnImage)
-        })
-        cameraViewModel.progressVisibility.observe(this, {
-            if (it) {
-                binding.progressBar.visibility = View.VISIBLE
-            } else {
-                binding.progressBar.visibility = View.INVISIBLE
+            else{
+                tab.text = "Preview"
             }
-        })
+            //tab.text = fragments[position] as BaseFragmen
+        }.attach()
+
     }
 
-    fun initializeRecyclerView() {
-        emotionListAdapter = EmotionListAdapter()
-        binding.recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+    fun initializeViewPagerAdapter() {
+        viewPager2 = binding.viewPager
+        viewPagerAdapter = ViewPagerFragmentAdapter(this@CameraActivity)
+        viewPager2.adapter = viewPagerAdapter
 
-        with(binding.recyclerView) {
-            setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(this@CameraActivity)
-            adapter = emotionListAdapter
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        emotionListAdapter.clear()
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            binding.captureImg.setImageBitmap(imageInteractor.getOrientatedImage(cameraViewModel.currentPhotoPath))
-            cameraViewModel.detectAndFrame(cameraViewModel.currentPhotoPath)
-        }
-
-        if (resultCode == RESULT_OK && requestCode == REQUEST_OPEN_GALLERY) {
-            // Get the url from data
-            data?.data?.run {
-                val path = imageInteractor.getPath(this)
-                binding.captureImg.setImageBitmap(imageInteractor.getOrientatedImage(path))
-                cameraViewModel.detectAndFrame(path)
-            }
-        }
-    }
-
-    private fun chooseImageFromGallery() {
-        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
-        startActivityForResult(Intent.createChooser(galleryIntent, "Select Picture"), REQUEST_OPEN_GALLERY)
-    }
-
-    fun initClickListeners() {
-        binding.captureBtn.setOnClickListener {
-            cameraViewModel.dispatchTakePictureIntent()
-        }
-        binding.galleryBtn.setOnClickListener {
-            openGallery()
-        }
-    }
-
-    private fun openGallery() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                SELECT_PICTURE_CODE
-            )
-        } else {
-            chooseImageFromGallery()
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
-        when (requestCode) {
-            SELECT_PICTURE_CODE -> {
-                val permission = permissions[0]
-                if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
-                    Toast.makeText(this, "Permission denied", Toast.LENGTH_LONG).show()
-                    val showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, permission!!)
-                    if (showRationale) {
-                        Log.d(TAG, "onRequestPermissionsResult: access to media is crucial to this app")
-                    }
-                } else {
-                    chooseImageFromGallery()
-                }
-            }
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 }
