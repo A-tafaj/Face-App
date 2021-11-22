@@ -24,9 +24,9 @@ import com.example.faceapp.utils.ImageInteractor
 import com.example.faceapp.viewmodel.CameraViewModel
 
 class ImageFragment : Fragment() {
-
     private val TAG = "CameraActivity"
     private val REQUEST_IMAGE_CAPTURE = 1
+    private val CAMERA_CODE = 10
     private val REQUEST_OPEN_GALLERY = 2
     private val SELECT_PICTURE_CODE = 3
     private val imageInteractor = ImageInteractor()
@@ -111,10 +111,21 @@ class ImageFragment : Fragment() {
 
     fun initClickListeners() {
         binding.captureBtn.setOnClickListener {
-            cameraViewModel.dispatchTakePictureIntent()
+            openCamera()
         }
         binding.galleryBtn.setOnClickListener {
             openGallery()
+        }
+    }
+
+    private fun openCamera() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                requireContext() as Activity, arrayOf(Manifest.permission.CAMERA),
+                CAMERA_CODE
+            )
+        } else {
+            cameraViewModel.dispatchTakePictureIntent()
         }
     }
 
@@ -141,6 +152,18 @@ class ImageFragment : Fragment() {
                     }
                 } else {
                     chooseImageFromGallery()
+                }
+            }
+            CAMERA_CODE -> {
+                val permission = permissions[0]
+                if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                    Toast.makeText(this.context, "Permission denied", Toast.LENGTH_LONG).show()
+                    val showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this.context as Activity, permission!!)
+                    if (showRationale) {
+                        Log.d(TAG, "onRequestPermissionsResult: access to camera is crucial to this app")
+                    }
+                } else {
+                    openCamera()
                 }
             }
         }

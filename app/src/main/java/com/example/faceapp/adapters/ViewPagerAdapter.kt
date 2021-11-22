@@ -9,6 +9,7 @@ import com.example.faceapp.ui.fragments.PreviewFragment
 class ViewPagerFragmentAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
 
     private val fragments = mutableListOf<Fragment>()
+
     companion object {
         private const val NUMBER_OF_FRAGMENTS = 2
     }
@@ -26,6 +27,4 @@ class ViewPagerFragmentAdapter(fragmentActivity: FragmentActivity) : FragmentSta
             else -> ImageFragment()
         }
     }
-
-    fun getMyFragments(): MutableList<Fragment> = fragments
 }
