@@ -2,7 +2,7 @@ package com.example.faceapp.utils
 
 import android.app.Application
 import android.util.Log
-import androidx.camera.camera2.Camera2Config
+import androidx.camera.camera2.Camera2Config.defaultConfig
 import androidx.camera.core.CameraXConfig
 
 class FaceApp : Application(), CameraXConfig.Provider {
@@ -22,6 +22,6 @@ class FaceApp : Application(), CameraXConfig.Provider {
 
     /** Sets the minimum logging level to be used for CameraX logs.*/
     override fun getCameraXConfig(): CameraXConfig {
-        return CameraXConfig.Builder.fromConfig(Camera2Config.defaultConfig()).setMinimumLoggingLevel(Log.ERROR).build()
+        return CameraXConfig.Builder.fromConfig(defaultConfig()).setMinimumLoggingLevel(Log.ERROR).build()
     }
 }

@@ -1,20 +1,13 @@
 package com.example.faceapp.viewmodel
 
-import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.hardware.Camera
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import android.widget.Toast
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -48,6 +41,13 @@ class CameraViewModel : ViewModel() {
     lateinit var currentPhotoPath: String
     private val faceServiceRestClient = getFaceServiceRestClient()
     private val imageInteractor = ImageInteractor()
+    var cameraSelector = MutableLiveData<CameraSelector>()
+    private var cameraProvider = ProcessCameraProvider.getInstance(FaceApp.getInstance().applicationContext).get()
+
+    /**initial lent facing back */
+    init {
+        cameraSelector.value = CameraSelector.DEFAULT_BACK_CAMERA
+    }
 
     /**
      * Creates a file where we store the taken image - this is used in order to avoid image quality loss
@@ -128,37 +128,21 @@ class CameraViewModel : ViewModel() {
         }
     }
 
-    /***/
-    /** Check if this device has a camera */
-    private fun checkCameraHardware(context: Context): Boolean {
-        if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-            // this device has a camera
-            return true
-        }
-        // no camera on this device
-        return false
-    }
-
-    /** A safe way to get an instance of the Camera object. */
-    fun getCameraInstance(): Boolean {
-        return try {
-            Camera.open()
-            true
-            // attempt to get a Camera instance
-        } catch (e: Exception) {
-            // Camera is not available (in use or does not exist)
-            Log.d(TAG, "getCameraInstance: Camera is not available (in use or does not exist)")
-            false // returns false if camera is unavailable
+    fun switchCameraSelector() {
+        cameraSelector.value = if (cameraSelector.value == CameraSelector.DEFAULT_BACK_CAMERA && hasFrontCamera()) {
+            CameraSelector.DEFAULT_FRONT_CAMERA
+        } else {
+            CameraSelector.DEFAULT_BACK_CAMERA
         }
     }
 
-    fun checkIfCameraIsAvailable(context: Context): Boolean {
-        if (checkCameraHardware(context)) {
-            if (getCameraInstance()) {
-                return true
-            }
-            return false
-        }
-        return false
+    fun hasFrontCamera(): Boolean {
+        return cameraProvider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA)
+    }
+
+    fun hasBackCamera(): Boolean {
+        return cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)
     }
 }
+
+

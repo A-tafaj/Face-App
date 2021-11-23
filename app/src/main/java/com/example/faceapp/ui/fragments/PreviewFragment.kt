@@ -18,7 +18,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.example.faceapp.R
 import com.example.faceapp.databinding.FragmentPreviewBinding
 import com.example.faceapp.utils.FaceApp
 import com.example.faceapp.viewmodel.CameraViewModel
@@ -27,7 +26,7 @@ import com.google.common.util.concurrent.ListenableFuture
 class PreviewFragment : Fragment() {
     private lateinit var binding: FragmentPreviewBinding
     private val CAMERA_CODE = 2
-    var cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+    lateinit var cameraSelector: CameraSelector
     private val cameraViewModel: CameraViewModel by viewModels()
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
 
@@ -41,27 +40,29 @@ class PreviewFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
+        observeViewModel()
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (cameraViewModel.checkIfCameraIsAvailable(requireContext())) {
-            tryOpeningCamera()
-        }
-        switchCameraButton()
-
-        Log.d(TAG, "onViewCreated: **")
+        tryOpeningCamera()
+        showSwitchCameraButton()
+        listenSwitchCameraButton()
     }
 
     override fun onResume() {
         super.onResume()
-        if (cameraViewModel.checkIfCameraIsAvailable(requireContext())) {
-            tryOpeningCamera()
-        }
+        tryOpeningCamera()
     }
 
-    fun tryOpeningCamera() {
+    private fun observeViewModel() {
+        cameraViewModel.cameraSelector.observe(viewLifecycleOwner, {
+            cameraSelector = it
+        })
+    }
+
+    private fun tryOpeningCamera() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                 requireContext() as Activity, arrayOf(Manifest.permission.CAMERA),
@@ -103,7 +104,6 @@ class PreviewFragment : Fragment() {
                 .also {
                     it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
                 }
-
             try {
                 // Unbind use cases before rebinding
                 cameraProvider.unbindAll()
@@ -112,26 +112,22 @@ class PreviewFragment : Fragment() {
                 cameraProvider.bindToLifecycle(
                     this, cameraSelector, preview
                 )
-
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
-
         }, ContextCompat.getMainExecutor(FaceApp.getInstance()))
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
-    fun switchCameraButton() {
+    private fun showSwitchCameraButton() {
+        if (!cameraViewModel.hasBackCamera() && cameraViewModel.hasFrontCamera() ||
+            cameraViewModel.hasBackCamera() && !cameraViewModel.hasFrontCamera()) {
+            binding.switchBtn.visibility = View.INVISIBLE
+        }
+    }
+
+    private fun listenSwitchCameraButton() {
         binding.switchBtn.setOnClickListener {
-            if (cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA) {
-                cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-                val image = resources.getDrawable(R.drawable.ic_baseline_cameraswitch_24)
-                binding.switchBtn.setImageDrawable(image)
-            } else {
-                cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
-                val image = resources.getDrawable(R.drawable.ic_baseline_camera_front_24)
-                binding.switchBtn.setImageDrawable(image)
-            }
+            cameraViewModel.switchCameraSelector()
             startCamera()
         }
     }
