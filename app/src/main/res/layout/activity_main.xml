@@ -19,17 +19,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/tab_layout"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-        <!--<com.google.android.material.tabs.TabItem
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/take_photo"
-            android:id="@+id/take_photo"/>
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/preview"
-            android:id="@+id/preview"/>-->
-    </com.google.android.material.tabs.TabLayout>
+        android:src="@mipmap/ic_launcher"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
