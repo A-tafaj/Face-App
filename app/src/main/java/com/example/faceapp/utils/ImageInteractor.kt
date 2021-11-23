@@ -1,12 +1,11 @@
 package com.example.faceapp.utils
 
 import android.database.Cursor
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
+import android.graphics.*
 import android.media.ExifInterface
 import android.net.Uri
 import android.provider.MediaStore
+import com.microsoft.projectoxford.face.contract.Face
 
 class ImageInteractor {
 
@@ -45,7 +44,7 @@ class ImageInteractor {
         )
     }
 
-    private fun getBitmapFromPath(path: String): Bitmap {
+    fun getBitmapFromPath(path: String): Bitmap {
         return BitmapFactory.decodeFile(path)
     }
 
@@ -61,5 +60,47 @@ class ImageInteractor {
             cursor.close()
         }
         return result ?: "Not found"
+    }
+
+    fun drawFaceRectanglesOnBitmap(originalBitmap: Bitmap, faces: Array<Face>?): Bitmap? {
+        val bitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(bitmap)
+        val paint = Paint()
+        val colors = arrayOf(Color.BLUE, Color.BLACK, Color.GREEN, Color.WHITE, Color.RED, Color.YELLOW, Color.CYAN)
+
+        paint.isAntiAlias = true
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 5f
+
+        if (faces != null) {
+            for (indice in faces.indices) {
+                paint.color = colors[(indice) % 6]
+                val faceRectangle = faces[indice].faceRectangle
+                val cX = faceRectangle.left + faceRectangle.width / 2
+                val cY = faceRectangle.top + faceRectangle.height
+
+                canvas.drawRect(
+                    faceRectangle.left.toFloat(),
+                    faceRectangle.top.toFloat(), (
+                            faceRectangle.left + faceRectangle.width).toFloat(), (
+                            faceRectangle.top + faceRectangle.height).toFloat(),
+                    paint
+                )
+                drawFaceId(canvas, 65, cX, cY + 70, Color.GREEN, indice + 1)
+            }
+        }
+        return bitmap
+    }
+
+    fun drawFaceId(canvas: Canvas, textsize: Int, cX: Int, cY: Int, color: Int, id: Int) {
+        val paint = Paint()
+
+        paint.isAntiAlias = true
+        paint.style = Paint.Style.FILL
+        paint.strokeWidth = 12f
+        paint.color = color
+        paint.textSize = textsize.toFloat()
+
+        canvas.drawText(id.toString(), cX.toFloat(), cY.toFloat(), paint)
     }
 }
