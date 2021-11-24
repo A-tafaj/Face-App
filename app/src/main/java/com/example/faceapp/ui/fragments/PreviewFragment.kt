@@ -5,19 +5,23 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
+import android.graphics.Camera
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.camera.core.CameraFilter
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.CameraX
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.example.faceapp.R
 import com.example.faceapp.databinding.FragmentPreviewBinding
 import com.example.faceapp.utils.FaceApp
 import com.example.faceapp.viewmodel.CameraViewModel
@@ -79,7 +83,7 @@ class PreviewFragment : Fragment() {
                 val permission = permissions[0]
                 if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
                     Toast.makeText(this.context, "Permission denied", Toast.LENGTH_LONG).show()
-                    val showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this.context as Activity, permission!!)
+                    val showRationale = permission?.let { ActivityCompat.shouldShowRequestPermissionRationale(this.context as Activity, it) } ?: false
                     if (showRationale) {
                         Log.d(TAG, "onRequestPermissionsResult: access to camera is crucial to this app")
                     }
@@ -114,13 +118,13 @@ class PreviewFragment : Fragment() {
                 )
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
+                Toast.makeText(requireContext(), getText(R.string.preview_failed), Toast.LENGTH_LONG).show()
             }
-        }, ContextCompat.getMainExecutor(FaceApp.getInstance()))
+        }, ContextCompat.getMainExecutor(requireContext()))
     }
 
     private fun showSwitchCameraButton() {
-        if (!cameraViewModel.hasBackCamera() && cameraViewModel.hasFrontCamera() ||
-            cameraViewModel.hasBackCamera() && !cameraViewModel.hasFrontCamera()) {
+        if (!cameraViewModel.hasFrontCamera() || !cameraViewModel.hasBackCamera()) {
             binding.switchBtn.visibility = View.INVISIBLE
         }
     }

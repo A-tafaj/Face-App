@@ -73,6 +73,15 @@ class ImageFragment : Fragment() {
                 binding.progressBar.visibility = View.INVISIBLE
             }
         })
+        cameraViewModel.detectionSucceded.observe(viewLifecycleOwner, { detectSuccess ->
+            if (detectSuccess) {
+                binding.recyclerView.visibility = View.VISIBLE
+                binding.detectFailed.visibility = View.INVISIBLE
+            } else {
+                binding.recyclerView.visibility = View.INVISIBLE
+                binding.detectFailed.visibility = View.VISIBLE
+            }
+        })
     }
 
     fun initializeRecyclerView() {

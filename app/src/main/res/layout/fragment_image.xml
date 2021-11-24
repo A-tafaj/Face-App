@@ -60,6 +60,17 @@
             app:layout_constraintTop_toBottomOf="@+id/apiData"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="150dp"
+            android:id="@+id/detect_failed"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/apiData"
+            android:text="@string/face_detection_failed"
+            android:visibility="invisible"
+            android:gravity="center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <ProgressBar
             android:id="@+id/progress_Bar"
@@ -75,6 +86,7 @@
             android:visibility="invisible"
             android:minHeight="50dp"
             android:progress="0" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

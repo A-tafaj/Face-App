@@ -7,4 +7,6 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="take_photo">Take photo</string>
     <string name="preview">Preview</string>
+    <string name="preview_failed">Could not open camera preview</string>
+    <string name="face_detection_failed">Face detection failed</string>
 </resources>

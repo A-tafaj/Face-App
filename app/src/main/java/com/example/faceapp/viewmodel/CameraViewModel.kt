@@ -33,6 +33,7 @@ private const val TAG = "CameraViewModel"
 
 class CameraViewModel : ViewModel() {
     var progressVisibility = MutableLiveData<Boolean>()
+    var detectionSucceded = MutableLiveData<Boolean>()
     var passArrayOfEmotions = MutableLiveData<List<String>>()
     var imageIntent = SingleLiveEvent<Intent>()
     var passDrawnImage = MutableLiveData<Bitmap>()
@@ -121,9 +122,12 @@ class CameraViewModel : ViewModel() {
                     val imageWithRectangle = imageInteractor.drawFaceRectanglesOnBitmap(image, result)
                     passDrawnImage.postValue(imageWithRectangle)
                     progressVisibility.postValue(false)
+                    detectionSucceded.postValue(true)
                 }
             } catch (exception: Exception) {
                 Log.e(TAG, "detectAndFrame: exception ->", exception)
+                progressVisibility.postValue(false)
+                detectionSucceded.postValue(false)
             }
         }
     }
