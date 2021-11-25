@@ -21,6 +21,10 @@
             android:src="@drawable/ic_baseline_camera_front_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
+        <com.example.faceapp.filterutils.GraphicOverlay
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/graphicOverlay_finder"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

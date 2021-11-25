@@ -23,6 +23,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.faceapp.R
 import com.example.faceapp.databinding.FragmentPreviewBinding
+import com.example.faceapp.filterutils.CameraManager
 import com.example.faceapp.utils.FaceApp
 import com.example.faceapp.viewmodel.CameraViewModel
 import com.google.common.util.concurrent.ListenableFuture
@@ -33,6 +34,7 @@ class PreviewFragment : Fragment() {
     lateinit var cameraSelector: CameraSelector
     private val cameraViewModel: CameraViewModel by viewModels()
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
+    private lateinit var cameraManager: CameraManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,19 +47,31 @@ class PreviewFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         observeViewModel()
+         createCameraManager()
+
         return binding.root
+    }
+    private fun createCameraManager() {
+        cameraManager = CameraManager(
+            requireContext(),
+            binding.viewFinder,
+            this,
+            binding.graphicOverlayFinder
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        tryOpeningCamera()
+        //tryOpeningCamera()
+        cameraManager.startCamera()
         showSwitchCameraButton()
         listenSwitchCameraButton()
     }
 
     override fun onResume() {
         super.onResume()
-        tryOpeningCamera()
+        cameraManager.startCamera()
+        //tryOpeningCamera()
     }
 
     private fun observeViewModel() {
@@ -73,7 +87,7 @@ class PreviewFragment : Fragment() {
                 CAMERA_CODE
             )
         } else {
-            startCamera()
+            cameraManager.startCamera()//startCamera()
         }
     }
 
@@ -88,7 +102,7 @@ class PreviewFragment : Fragment() {
                         Log.d(TAG, "onRequestPermissionsResult: access to camera is crucial to this app")
                     }
                 } else {
-                    startCamera()
+                    cameraManager.startCamera()//startCamera()
                 }
             }
         }
@@ -114,7 +128,7 @@ class PreviewFragment : Fragment() {
 
                 // Bind use cases to camera
                 cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview
+                    this, cameraSelector, preview,
                 )
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
@@ -132,7 +146,7 @@ class PreviewFragment : Fragment() {
     private fun listenSwitchCameraButton() {
         binding.switchBtn.setOnClickListener {
             cameraViewModel.switchCameraSelector()
-            startCamera()
+            cameraManager.startCamera()//startCamera()
         }
     }
 }
