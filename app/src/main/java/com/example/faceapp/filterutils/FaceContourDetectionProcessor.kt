@@ -49,12 +49,12 @@ class FaceContourDetectionProcessor(private val view: GraphicOverlay) :
         graphicOverlay.postInvalidate()
     }
 
-    override fun onFailure(/*e: Exception*/) {
-        Log.w(TAG, "Face Detector failed.")/*$e*/
-    }
-
     companion object {
         private const val TAG = "FaceDetectorProcessor"
+    }
+
+    override fun onFailure(e: Exception) {
+        Log.e(TAG, "Face Detector failed, onFailure: ${e.stackTrace}")
     }
 
 }

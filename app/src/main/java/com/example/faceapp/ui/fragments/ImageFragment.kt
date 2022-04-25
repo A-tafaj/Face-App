@@ -23,12 +23,14 @@ import com.example.faceapp.databinding.FragmentImageBinding
 import com.example.faceapp.utils.ImageInteractor
 import com.example.faceapp.viewmodel.CameraViewModel
 
+private const val TAG = "CameraActivity"
+private const val REQUEST_IMAGE_CAPTURE = 1
+private const val CAMERA_CODE = 10
+private const val REQUEST_OPEN_GALLERY = 2
+private const val SELECT_PICTURE_CODE = 3
+
 class ImageFragment : Fragment() {
-    private val TAG = "CameraActivity"
-    private val REQUEST_IMAGE_CAPTURE = 1
-    private val CAMERA_CODE = 10
-    private val REQUEST_OPEN_GALLERY = 2
-    private val SELECT_PICTURE_CODE = 3
+
     private val imageInteractor = ImageInteractor()
     private val cameraViewModel: CameraViewModel by viewModels()
 
@@ -52,28 +54,28 @@ class ImageFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        cameraViewModel.imageIntent.observe(this, { intent ->
+        cameraViewModel.imageIntent.observe(this) { intent ->
             try {
                 startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
             } catch (e: ActivityNotFoundException) {
                 Log.e(TAG, "dispatchTakePictureIntent: $e")
             }
-        })
+        }
 
-        cameraViewModel.passArrayOfEmotions.observe(viewLifecycleOwner, {
+        cameraViewModel.passArrayOfEmotions.observe(viewLifecycleOwner) {
             emotionListAdapter.setMyListData(it)
-        })
-        cameraViewModel.passDrawnImage.observe(viewLifecycleOwner, { drawnImage ->
+        }
+        cameraViewModel.passDrawnImage.observe(viewLifecycleOwner) { drawnImage ->
             binding.captureImg.setImageBitmap(drawnImage)
-        })
-        cameraViewModel.progressVisibility.observe(viewLifecycleOwner, {
+        }
+        cameraViewModel.progressVisibility.observe(viewLifecycleOwner) {
             if (it) {
                 binding.progressBar.visibility = View.VISIBLE
             } else {
                 binding.progressBar.visibility = View.INVISIBLE
             }
-        })
-        cameraViewModel.detectionSucceded.observe(viewLifecycleOwner, { detectSuccess ->
+        }
+        cameraViewModel.detectionSucceded.observe(viewLifecycleOwner) { detectSuccess ->
             if (detectSuccess) {
                 binding.recyclerView.visibility = View.VISIBLE
                 binding.detectFailed.visibility = View.INVISIBLE
@@ -81,10 +83,10 @@ class ImageFragment : Fragment() {
                 binding.recyclerView.visibility = View.INVISIBLE
                 binding.detectFailed.visibility = View.VISIBLE
             }
-        })
+        }
     }
 
-    fun initializeRecyclerView() {
+    private fun initializeRecyclerView() {
         emotionListAdapter = EmotionListAdapter()
         binding.recyclerView.addItemDecoration(DividerItemDecoration(this.context, DividerItemDecoration.VERTICAL))
 
@@ -118,7 +120,7 @@ class ImageFragment : Fragment() {
         startActivityForResult(Intent.createChooser(galleryIntent, "Select Picture"), REQUEST_OPEN_GALLERY)
     }
 
-    fun initClickListeners() {
+    private fun initClickListeners() {
         binding.captureBtn.setOnClickListener {
             openCamera()
         }

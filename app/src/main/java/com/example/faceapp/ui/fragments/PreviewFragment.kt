@@ -75,9 +75,9 @@ class PreviewFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        cameraViewModel.cameraSelector.observe(viewLifecycleOwner, {
+        cameraViewModel.cameraSelector.observe(viewLifecycleOwner) {
             cameraSelector = it
-        })
+        }
     }
 
     private fun tryOpeningCamera() {
@@ -87,7 +87,7 @@ class PreviewFragment : Fragment() {
                 CAMERA_CODE
             )
         } else {
-            cameraManager.startCamera()//startCamera()
+            cameraManager.startCamera()
         }
     }
 
@@ -102,7 +102,7 @@ class PreviewFragment : Fragment() {
                         Log.d(TAG, "onRequestPermissionsResult: access to camera is crucial to this app")
                     }
                 } else {
-                    cameraManager.startCamera()//startCamera()
+                    cameraManager.startCamera()
                 }
             }
         }
@@ -146,7 +146,7 @@ class PreviewFragment : Fragment() {
     private fun listenSwitchCameraButton() {
         binding.switchBtn.setOnClickListener {
             cameraViewModel.switchCameraSelector()
-            cameraManager.startCamera()//startCamera()
+            cameraManager.startCamera()
         }
     }
 }

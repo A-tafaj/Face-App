@@ -36,7 +36,7 @@ class ImageInteractor {
         return rotatedBitmap
     }
 
-    fun getOrientation(path: String): Int {
+    private fun getOrientation(path: String): Int {
         val exifInterface = ExifInterface(path);
         return exifInterface.getAttributeInt(
             ExifInterface.TAG_ORIENTATION,
@@ -54,8 +54,8 @@ class ImageInteractor {
         val cursor: Cursor? = uri?.let { FaceApp.getInstance().applicationContext.contentResolver.query(it, proj, null, null, null) }
         if (cursor != null) {
             if (cursor.moveToFirst()) {
-                val column_index: Int = cursor.getColumnIndexOrThrow(proj[0])
-                result = cursor.getString(column_index)
+                val columnIndex: Int = cursor.getColumnIndexOrThrow(proj[0])
+                result = cursor.getString(columnIndex)
             }
             cursor.close()
         }
@@ -73,9 +73,9 @@ class ImageInteractor {
         paint.strokeWidth = 5f
 
         if (faces != null) {
-            for (indice in faces.indices) {
-                paint.color = colors[(indice) % 6]
-                val faceRectangle = faces[indice].faceRectangle
+            for (indices in faces.indices) {
+                paint.color = colors[(indices) % 6]
+                val faceRectangle = faces[indices].faceRectangle
                 val cX = faceRectangle.left + faceRectangle.width / 2
                 val cY = faceRectangle.top + faceRectangle.height
 
@@ -86,13 +86,13 @@ class ImageInteractor {
                             faceRectangle.top + faceRectangle.height).toFloat(),
                     paint
                 )
-                drawFaceId(canvas, 65, cX, cY + 70, Color.GREEN, indice + 1)
+                drawFaceId(canvas, 65, cX, cY + 70, Color.GREEN, indices + 1)
             }
         }
         return bitmap
     }
 
-    fun drawFaceId(canvas: Canvas, textsize: Int, cX: Int, cY: Int, color: Int, id: Int) {
+    private fun drawFaceId(canvas: Canvas, textsize: Int, cX: Int, cY: Int, color: Int, id: Int) {
         val paint = Paint()
 
         paint.isAntiAlias = true

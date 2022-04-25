@@ -13,11 +13,11 @@ class SingleLiveEvent<T>: MutableLiveData<T>() {
         if (hasActiveObservers()){
             Log.w(TAG, "observe: Multiple observers registered but only one will be notified of changes.")
         }
-        super.observe(owner, {
-            if (mPending.compareAndSet(true, false)){
+        super.observe(owner) {
+            if (mPending.compareAndSet(true, false)) {
                 observer.onChanged(it)
             }
-        })
+        }
     }
 
     override fun setValue(value: T) {

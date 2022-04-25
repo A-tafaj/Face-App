@@ -44,15 +44,9 @@ class CameraManager(
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
-    fun selectAnalyzer(): ImageAnalysis.Analyzer {
-         analyzerVisionType =VisionType.Face /*
-            VisionType.Object -> ObjectDetectionProcessor(graphicOverlay)
-            VisionType.OCR -> TextRecognitionProcessor(graphicOverlay)*/
-        return  FaceContourDetectionProcessor(graphicOverlay)
-/*
-            VisionType.Barcode -> BarcodeScannerProcessor(graphicOverlay)
-*/
-
+    private fun selectAnalyzer(): ImageAnalysis.Analyzer {
+        analyzerVisionType = VisionType.Face
+        return FaceContourDetectionProcessor(graphicOverlay)
     }
 
     private fun setCameraConfig(
@@ -69,10 +63,10 @@ class CameraManager(
                 imageAnalyzer
             )
             preview?.setSurfaceProvider(
-                finderView.surfaceProvider//createSurfaceProvider()
+                finderView.surfaceProvider
             )
         } catch (e: Exception) {
-            Log.e(TAG, "Use case binding failed", e)
+            Log.e(TAG, "Use case binding failed", e.cause)
         }
     }
 
@@ -112,7 +106,7 @@ class CameraManager(
                     .requireLensFacing(cameraSelectorOption)
                     .build()
 
-                metrics =  DisplayMetrics().also { finderView.display.getRealMetrics(it) }
+                metrics = DisplayMetrics().also { finderView.display.getRealMetrics(it) }
 
                 imageCapture =
                     ImageCapture.Builder()
@@ -143,11 +137,11 @@ class CameraManager(
         }
     }
 
-    fun isHorizontalMode() : Boolean {
+    fun isHorizontalMode(): Boolean {
         return rotation == 90f || rotation == 270f
     }
 
-    fun isFrontMode() : Boolean {
+    fun isFrontMode(): Boolean {
         return cameraSelectorOption == CameraSelector.LENS_FACING_FRONT
     }
 
